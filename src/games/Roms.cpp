@@ -41,6 +41,7 @@
 // genesis games
 #include "supported/SonicTheHedgehog.hpp"
 #include "supported/StreetsOfRage2.hpp"
+#include "supported/StreetsOfRage.hpp"
 
 // Atari Games
 //#include "supported/Breakout.hpp"
@@ -186,6 +187,7 @@ static const RomSettings *roms[]  = {
   
   //Genesis games
   new SonicTheHedgehogSettings(),
+  new StreetsOfRageSettings(),
   new StreetsOfRage2Settings(),
 };
 
