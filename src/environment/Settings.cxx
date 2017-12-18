@@ -342,7 +342,7 @@ void Settings::setDefaultSettings() {
   intSettings.emplace(std::make_pair("SOR3_end_level", 1));
   intSettings.emplace(std::make_pair("SOR3_difficulty", 1));
   intSettings.emplace(std::make_pair("SOR3_lives", 3));
-  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "skate"));
+  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "axel"));
   stringSettings.emplace(std::make_pair("SOR3_game_type", "single"));
  
 
