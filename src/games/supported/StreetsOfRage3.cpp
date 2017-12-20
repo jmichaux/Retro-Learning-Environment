@@ -201,10 +201,10 @@ ActionVect StreetsOfRage3Settings::getStartingActions(const RleSystem& system){
 	ActionVect startingActions;
 
 // While not on the start screen press the start button
-	while(readRam(&system, 0xFB00) != 26){
-			INSERT_NOPS(1 * num_of_nops)
-			INSERT_ACTION_SINGLE_A(JOYPAD_START)
-	}
+//	while(readRam(&system, 0xFB00) != 26){
+//			INSERT_NOPS(1 * num_of_nops)
+//			INSERT_ACTION_SINGLE_A(JOYPAD_START)
+//	}
 	//INSERT_NOPS(3 * num_of_nops)
 	
 
@@ -226,10 +226,10 @@ ActionVect StreetsOfRage3Settings::getStartingActions(const RleSystem& system){
 
 // Choose starting level
 //	INSERT_NOPS(3 * num_of_nops)
-	INSERT_ACTION_SINGLE_A(JOYPAD_START)
-	INSERT_NOPS(3 * num_of_nops)
+//	INSERT_ACTION_SINGLE_A(JOYPAD_START)
+//	INSERT_NOPS(3 * num_of_nops)
 //	writeRam(&system, 0xFB02, 0x2);
-	INSERT_ACTION_SINGLE_A(JOYPAD_START)
+//	INSERT_ACTION_SINGLE_A(JOYPAD_START)
 //  INSERT_ACTION_SINGLE_A(JOYPAD_UP)
 //	INSERT_NOPS(0.5 * num_of_nops)
 	// Enter code for level select
@@ -285,7 +285,7 @@ ActionVect StreetsOfRage3Settings::getStartingActions(const RleSystem& system){
 // Level 2
 
 // Start Level 3
-    	INSERT_NOPS(8 * num_of_nops);
+//    	INSERT_NOPS(8 * num_of_nops);
  //   INSERT_ACTION_SINGLE_A(JOYPAD_DOWN);
  //   INSERT_ACTION_SINGLE_A(JOYPAD_NOOP)
 //		INSERT_ACTION_SINGLE_A(JOYPAD_START)
