@@ -338,11 +338,11 @@ void Settings::setDefaultSettings() {
 
   // Streets Of Rage 3
   boolSettings.emplace(std::make_pair("SOR3_test", false));
-  intSettings.emplace(std::make_pair("SOR3_start_level", 1));
+  intSettings.emplace(std::make_pair("SOR3_start_level", 3));
   intSettings.emplace(std::make_pair("SOR3_end_level", 1));
-  intSettings.emplace(std::make_pair("SOR3_difficulty", 1));
+  intSettings.emplace(std::make_pair("SOR3_difficulty", 3));
   intSettings.emplace(std::make_pair("SOR3_lives", 3));
-  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "axel"));
+  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "skate"));
   stringSettings.emplace(std::make_pair("SOR3_game_type", "single"));
  
 
