@@ -27,7 +27,7 @@ using namespace rle;
 StreetsOfRage3Settings::StreetsOfRage3Settings() {
     reset();
 
-
+// Actions will be set in a RLE gym wrapper
  
       minimalActions = {JOYPAD_NOOP,
     			// Moving
@@ -80,13 +80,13 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
 // This setting gives all enemies minimal health and lives
   if((system.settings()->getBool("SOR3_test") == true) || system.settings()->getInt("SOR3_difficulty") == 0){
       // Fix enemy health and lives
-      writeRam(&system, 0xE16D, 0x0);
-      writeRam(&system, 0xE26D, 0x0);
+    //  writeRam(&system, 0xE16D, 0x0);
+     // writeRam(&system, 0xE26D, 0x0);
       writeRam(&system, 0xE36D, 0x0);
       writeRam(&system, 0xE46D, 0x0);
       writeRam(&system, 0xE56D, 0x0);
-      writeRam(&system, 0xE18B, 0x0);
-      writeRam(&system, 0xE28B, 0x0);
+    //  writeRam(&system, 0xE18B, 0x0);
+    //  writeRam(&system, 0xE28B, 0x0);
       writeRam(&system, 0xE38B, 0x0);
       writeRam(&system, 0xE48B, 0x0);
       writeRam(&system, 0xE58B, 0x0);
@@ -97,21 +97,21 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
 //  Read out current score, health, lives, kills  
   // Score set to 0. Will read score from rle/gym wrapper
   reward_t score = 0; //getDecimalScore(0xEF99, 0xEF96, &system);	
-  m_lives = readRam(&system, 0xDF8A);
-  m_health = readRam(&system, 0xDF6D);
+  // m_lives = readRam(&system, 0xDF8A);
+  // m_health = readRam(&system, 0xDF6D);
  
 //  std::cout << readRam(&system, 0xFB02) << std::endl;
 
 //  update the reward
   m_reward = score - m_score;
   m_score = score;
+
 //	Update terminal status
   if ((readRam(&system, 0xDFA1) == 255) && readRam(&system, 0xFB00) == 14){
       std::cout << "LOST GAME" << std::endl;
       m_terminal = true;
     }
 	
-
 // Get level information
   m_current_level = readRam(&system, 0xFB04) + 1;
   m_end_level = system.settings()->getInt("SOR3_end_level");
@@ -119,57 +119,86 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
      m_end_level = system.settings()->getInt("SOR3_start_level");
   }
 
-  int m_progress_1 = readRam(&system, 0xDF40); // distance 1
-  int m_progress_2 = readRam(&system, 0xFED0); // distance 2
-  int m_progress_3 = readRam(&system, 0xDF02); // distance 3
-  int scene = readRam(&system, 0xFB05); // scene 
+  // int m_progress_1 = readRam(&system, 0xDF40); // distance 1
+  // int m_progress_2 = readRam(&system, 0xFED0); // distance 2
+  // int m_progress_3 = readRam(&system, 0xDF02); // distance 3
+  // 
+std::cout << "Scene: " << readRam(&system, 0xFB05) << std::endl;
+std::cout << "Boss ID: " << readRam(&system, 0xE10C) << std::endl;
+std::cout << "Boss ID: " << readRam(&system, 0xE20C) << std::endl;
+// // Win if round clear. Bonus points will be calculated in the RLE gym wrapper
+//   if ((m_end_level == m_current_level) && (readRam(&system, 0xFB00) == 46)){
+    
+// 		m_terminal = true;
+// }
 
-// Win if round clear
-  if ((m_end_level == m_current_level) && (readRam(&system, 0xFB00) == 46) && m_progress_2 == 25){
-		m_terminal = true;
+// Get boss status
+int boss_health = readRam(&system, 0xE16C) + readRam(&system, 0xE26C) + readRam(&system, 0xE36C);
+int boss_lives = readRam(&system, 0xE16B) + readRam(&system, 0xE26B) + readRam(&system, 0xE36B);
+int scene = readRam(&system, 0xFB05); // scene 
+
+// Level 1
+// if ((m_end_level == 1) && (m_current_level == 1)){
+//        if ((scene == 2) && (readRam(&system, 0xE10C) == 46) && (boss_health == 0) && (boss_lives == 0)){
+//            m_terminal = true;
+//        }
+//   }
+
+// Level 2
+if ((m_end_level == 2) && (m_current_level == 2)){
+       //if ((scene == 2) && (readRam(&system, 0xE10C) == 48) && (readRam(&system, 0xE20C) == 48)){
+        if ((scene == 2) && (readRam(&system, 0xE10C) != 0 ) (boss_health + boss_lives == 0)){ 
+           m_terminal = true;
+       }
   }
+  
+// Win if round is cleared
+  //   if ((m_end_level == m_current_level) && (readRam(&system, 0xFB00) == 14) && (readRam(&system, 0xFED0) == 100) ){
+  //   m_terminal = true;
+  // }
 
-  // Level 1
-  if (m_end_level == 1){
-       if ((m_current_level == 1) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
-           m_terminal = true;
-       }
-  }// Level 2
-  else if (m_end_level == 2){
-       if ((m_current_level == 2) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 128)){
-           m_terminal = true;
-       }
-  }// Level 3
-  else if (m_end_level == 3){ 
-      if ((m_current_level == 3) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
-           m_terminal = true;
-      }      
-  }// Level 4
-  else if (m_end_level == 4){
-      if ((m_current_level == 4) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 300)){
-           m_terminal = true;
-      }
-  }// Level 5
-  else if (m_end_level == 5){ 
-      if ((m_current_level == 5) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
-           m_terminal = true;
-       }
-  }// Level 6
-  else if (m_end_level == 6){
-      if ((m_current_level == 6) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 200)){
-           m_terminal = true;
-       }
-  }// Level 7
-  else if (m_end_level == 7){
-      if ((m_current_level == 7) && (scene == 4) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
-           m_terminal = true;
-       }
-  }// Level 8 (Alternate level 7)
-  else if (m_end_level == 8){
-      if ((m_current_level == 8) && (scene == 3) && (m_progress_1 == 0) && (m_progress_2 == 116) &&  (m_progress_3 > 30)){
-           m_terminal = true;
-       }
-  } 
+  // // Level 1
+  // if (m_end_level == 1){
+  //      if ((m_current_level == 1) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
+  //          m_terminal = true;
+  //      }
+  // }// Level 2
+  // else if (m_end_level == 2){
+  //      if ((m_current_level == 2) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 128)){
+  //          m_terminal = true;
+  //      }
+  // }// Level 3
+  // else if (m_end_level == 3){ 
+  //     if ((m_current_level == 3) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
+  //          m_terminal = true;
+  //     }      
+  // }// Level 4
+  // else if (m_end_level == 4){
+  //     if ((m_current_level == 4) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 300)){
+  //          m_terminal = true;
+  //     }
+  // }// Level 5
+  // else if (m_end_level == 5){ 
+  //     if ((m_current_level == 5) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
+  //          m_terminal = true;
+  //      }
+  // }// Level 6
+  // else if (m_end_level == 6){
+  //     if ((m_current_level == 6) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 200)){
+  //          m_terminal = true;
+  //      }
+  // }// Level 7
+  // else if (m_end_level == 7){
+  //     if ((m_current_level == 7) && (scene == 4) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
+  //          m_terminal = true;
+  //      }
+  // }// Level 8 (Alternate level 7)
+  // else if (m_end_level == 8){
+  //     if ((m_current_level == 8) && (scene == 3) && (m_progress_1 == 0) && (m_progress_2 == 116) &&  (m_progress_3 > 30)){
+  //          m_terminal = true;
+  //      }
+  // } 
+
 }
 
 
@@ -280,8 +309,8 @@ ActionVect StreetsOfRage3Settings::getStartingActions(const RleSystem& system){
 
 // Wait for level to start.
 	// Note that these numbers were tuned to minimize the number of
-	// irrelevant frames that the agent sees. If testing, we write
-	// the level and scene selection directly to the RAM. 
+	// irrelevant frames that the agent sees. If testing, we choose 
+  // the level directly to RAM. 
 	if(system.settings()->getBool("SOR3_test") == false){
 		if((start_level <= 1) || (start_level > 8)){
 			INSERT_NOPS(3 * num_of_nops)
@@ -372,7 +401,7 @@ void StreetsOfRage3Settings::startingOperations(RleSystem& system){
 		}
 	}
 
-	//set number of lives 
+	// Set number of lives 
 	//(This sets the number of lives for the game. Would need to do 
 	//this differently if you wanted to set the number of lives differently in
 	//2 player mode.)

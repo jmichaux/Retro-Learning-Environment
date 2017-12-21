@@ -337,21 +337,21 @@ void Settings::setDefaultSettings() {
 	intSettings.emplace(std::make_pair("MK_opponent_character", 0));
 
   // Streets Of Rage 3
-  boolSettings.emplace(std::make_pair("SOR3_test", true));
-  intSettings.emplace(std::make_pair("SOR3_start_level", 1));
-  intSettings.emplace(std::make_pair("SOR3_end_level", 1));
-  intSettings.emplace(std::make_pair("SOR3_difficulty", 5));
+  stringSettings.emplace(std::make_pair("SOR3_game_type", "single")); // can be single, coop, duel
+  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "axel")); 
+  stringSettings.emplace(std::make_pair("SOR3_player_2_character", "blaze"));
+  intSettings.emplace(std::make_pair("SOR3_start_level", 2));
+  intSettings.emplace(std::make_pair("SOR3_end_level", 2));
+  intSettings.emplace(std::make_pair("SOR3_difficulty", 1));
   intSettings.emplace(std::make_pair("SOR3_lives", 9));
-  stringSettings.emplace(std::make_pair("SOR3_player_1_character", "axel"));
-  stringSettings.emplace(std::make_pair("SOR3_game_type", "single"));
- 
+  boolSettings.emplace(std::make_pair("SOR3_test", true));
+  
 
+  // Super Mario Kart
+  stringSettings.emplace(std::make_pair("SUPER_MARIO_KART_player1_character", "bowser"));
 
-        // Super Mario Kart
-        stringSettings.emplace(std::make_pair("SUPER_MARIO_KART_player1_character", "bowser"));
-
-        //Super Double Dragon
-        stringSettings.emplace(std::make_pair("DDRAGON_reward_strategy", "score"));
+  //Super Double Dragon
+  stringSettings.emplace(std::make_pair("DDRAGON_reward_strategy", "score"));
         
 	for (map<string, string>::iterator it = stringSettings.begin();
 			it != stringSettings.end(); it++) {
