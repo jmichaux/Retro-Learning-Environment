@@ -34,19 +34,19 @@ StreetsOfRage3Settings::StreetsOfRage3Settings() {
 //          JOYPAD_DOWN,      //Walk down
 //          JOYPAD_UP,        // Walk up
 //					JOYPAD_LEFT,      // Walk left
-//					JOYPAD_RIGHT,     // Walk right
+					JOYPAD_RIGHT,     // Walk right
 //         	JOYPAD_GENESIS_C, // Jump
 //          JOYPAD_LEFT | JOYPAD_GENESIS_C,
 //          JOYPAD_RIGHT | JOYPAD_GENESIS_C,
 
 		      // Special attacks
-//					JOYPAD_GENESIS_A, 
-//          JOYPAD_LEFT | JOYPAD_GENESIS_A,
-//          JOYPAD_RIGHT |JOYPAD_GENESIS_A,
+					JOYPAD_GENESIS_A, 
+   //       JOYPAD_LEFT | JOYPAD_GENESIS_A,
+    //      JOYPAD_RIGHT |JOYPAD_GENESIS_A,
 
           // Regular Attacks
 	    		JOYPAD_GENESIS_B, 
-//					JOYPAD_GENESIS_B | JOYPAD_GENESIS_C,   // Rear attack or Super slam 
+					JOYPAD_GENESIS_B | JOYPAD_GENESIS_C,   // Rear attack or Super slam 
 				  
           // Attacks when holding enemy
 //          JOYPAD_GENESIS_B | JOYPAD_LEFT,  
@@ -68,10 +68,10 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
   if(system.settings()->getBool("SOR3_test") == true){
 
       // Fix Agent health
-      writeRam(&system, 0xDF6C, 0x34);
+      writeRam(&system, 0xDF6D, 0x34);
 
       // Make invincible
-      writeRam(&system, 0xDF5C, 0xFF);
+      writeRam(&system, 0xDF5D, 0xFF);
   
       // Freeze Time
      // writeRam(&system, 0xFC3C, 0x99);
@@ -80,16 +80,16 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
 // This setting gives all enemies minimal health and lives
   if((system.settings()->getBool("SOR3_test") == true) || system.settings()->getInt("SOR3_difficulty") == 0){
       // Fix enemy health and lives
-      writeRam(&system, 0xE16C, 0x0);
-      writeRam(&system, 0xE26C, 0x0);
-      writeRam(&system, 0xE36C, 0x0);
-      writeRam(&system, 0xE46C, 0x0);
-      writeRam(&system, 0xE56C, 0x0);
-      writeRam(&system, 0xE18A, 0x0);
-      writeRam(&system, 0xE28A, 0x0);
-      writeRam(&system, 0xE38A, 0x0);
-      writeRam(&system, 0xE48A, 0x0);
-      writeRam(&system, 0xE58A, 0x0);
+      writeRam(&system, 0xE16D, 0x0);
+      writeRam(&system, 0xE26D, 0x0);
+      writeRam(&system, 0xE36D, 0x0);
+      writeRam(&system, 0xE46D, 0x0);
+      writeRam(&system, 0xE56D, 0x0);
+      writeRam(&system, 0xE18B, 0x0);
+      writeRam(&system, 0xE28B, 0x0);
+      writeRam(&system, 0xE38B, 0x0);
+      writeRam(&system, 0xE48B, 0x0);
+      writeRam(&system, 0xE58B, 0x0);
 }
 // End code for testing
 
@@ -114,7 +114,6 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
 
 // Get level information
   m_current_level = readRam(&system, 0xFB04) + 1;
-	//std::cout << m_current_level << std::endl;
   m_end_level = system.settings()->getInt("SOR3_end_level");
   if((m_end_level < system.settings()->getInt("SOR3_start_level")) || (m_end_level > 8)){
      m_end_level = system.settings()->getInt("SOR3_start_level");
@@ -124,6 +123,11 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
   int m_progress_2 = readRam(&system, 0xFED0); // distance 2
   int m_progress_3 = readRam(&system, 0xDF02); // distance 3
   int scene = readRam(&system, 0xFB05); // scene 
+
+// Win if round clear
+  if ((m_end_level == m_current_level) && (readRam(&system, 0xFB00) == 46) && m_progress_2 == 25){
+		m_terminal = true;
+  }
 
   // Level 1
   if (m_end_level == 1){
@@ -275,26 +279,32 @@ ActionVect StreetsOfRage3Settings::getStartingActions(const RleSystem& system){
 
 
 // Wait for level to start.
-// Note that these numbers were tuned to minimize beginning of level scenes 
-	if(start_level == 1){
-		INSERT_NOPS(3 * num_of_nops)
-		INSERT_ACTION_SINGLE_A(JOYPAD_START)
-		INSERT_NOPS(4 *  num_of_nops)
-	}else if(start_level == 2){
-		INSERT_NOPS(3.5 * num_of_nops)
-	}else if(start_level == 3){
-		INSERT_NOPS(4.6 * num_of_nops)
-	}else if(start_level == 4){
-		INSERT_NOPS(3.7 * num_of_nops)
-	}else if(start_level == 5){
-		INSERT_NOPS(3.7 * num_of_nops)
-	}else if(start_level == 6){
-		INSERT_NOPS(3.7 * num_of_nops)
-	}else if(start_level == 7){
-		INSERT_NOPS(0.36 * num_of_nops)
-	}else if(start_level == 8){
-		INSERT_NOPS(0.36 * num_of_nops)
-	}
+	// Note that these numbers were tuned to minimize the number of
+	// irrelevant frames that the agent sees. If testing, we write
+	// the level and scene selection directly to the RAM. 
+	if(system.settings()->getBool("SOR3_test") == false){
+		if((start_level <= 1) || (start_level > 8)){
+			INSERT_NOPS(3 * num_of_nops)
+			INSERT_ACTION_SINGLE_A(JOYPAD_START)
+			INSERT_NOPS(4 *  num_of_nops)
+		}else if(start_level == 2){
+			INSERT_NOPS(3.5 * num_of_nops)
+		}else if(start_level == 3){
+			INSERT_NOPS(4.6 * num_of_nops)
+		}else if(start_level == 4){
+			INSERT_NOPS(3.7 * num_of_nops)
+		}else if(start_level == 5){
+			INSERT_NOPS(3.7 * num_of_nops)
+		}else if(start_level == 6){
+			INSERT_NOPS(3.7 * num_of_nops)
+		// Levels 7 and 8 can only be accessed by beating level 6
+		// on normal (?) or by writing to the address 0xFB04.
+		}else if(start_level == 7){
+			INSERT_NOPS(0.36 * num_of_nops)
+		}else if(start_level == 8){
+			INSERT_NOPS(0.36 * num_of_nops)
+		}
+}
 	return startingActions;
 
 }
@@ -322,23 +332,44 @@ void StreetsOfRage3Settings::startingOperations(RleSystem& system){
 	}
 
 	//set number of continues. By Default continues set to zero.
-	writeRam(&system,0xDFA0, 0x1); 
+	writeRam(&system, 0xDFA0, 0x1); 
 
-	//set start level	
+	//set start level for testing or to access Levels 7 and 8	
 	m_start_level = system.settings()->getInt("SOR3_start_level");
-//	if((m_start_level <= 1) || (m_start_level > 7)){
-//		std::cout << "Start level out of bounds. Starting at level 1" << std::endl;
-//		writeRam(&system, 0xFB04, 0x0);
-//	}else {
-//		writeRam(&system, 0xFB04, (m_start_level - 1) * 0x01);
-//	}
-	if(m_start_level == 7){
-		writeRam(&system, 0xFB04, 0x6);
+	if(system.settings()->getBool("SOR3_test") == true){
+		// Max out the difficulty
+		writeRam(&system, 0xFF08, 0x0A);
+		// Go to the last scene of the chosen level
+		if(m_start_level == 1){
+			writeRam(&system, 0xFB04, 0x0);
+			writeRam(&system, 0xFB02, 0x2);
+		}else if(m_start_level == 2){
+			writeRam(&system, 0xFB04, 0x1);
+			writeRam(&system, 0xFB02, 0x2);
+		}else if(m_start_level == 3){
+			writeRam(&system, 0xFB04, 0x2);
+			writeRam(&system, 0xFB02, 0x2);
+		}else if(m_start_level == 4){
+			writeRam(&system, 0xFB04, 0x3);
+			writeRam(&system, 0xFB02, 0x2);
+		}else if (m_start_level == 5){
+			writeRam(&system, 0xFB04, 0x4);
+			writeRam(&system, 0xFB02, 0x7);
+		}else if (m_start_level == 6){ 
+			writeRam(&system, 0xFB04, 0x5);
+			writeRam(&system, 0xFB02, 0x7);
+		}else if(m_start_level == 7){
+			writeRam(&system, 0xFB04, 0x6);
+			writeRam(&system, 0xFB02, 0x4);
+		}else if (m_start_level == 8){
+			writeRam(&system, 0xFB04, 0x7);
+			writeRam(&system, 0xFB02, 0x3);
+		}
+	}else {
+		// There is a glitch at Scene 0
+		if((m_start_level == 7) || (m_start_level == 8)){
 		writeRam(&system, 0xFB02, 0x1);
-	}
-	if(m_start_level == 8){
-		writeRam(&system, 0xFB04, 0x7);
-		writeRam(&system, 0xFB02, 0x1);
+		}
 	}
 
 	//set number of lives 
@@ -350,7 +381,7 @@ void StreetsOfRage3Settings::startingOperations(RleSystem& system){
 		std::cout << "Number of lives must be between 1 and 9. Initializing agent with 3 lives" << std::endl;
 		writeRam(&system, 0xDF8A, 0x2);
 	}else {
-		writeRam(&system, 0xDF8A, 0x0);
+		writeRam(&system, 0xDF8A, (m_lives - 1) * 0x1);
 	}
 }
 
