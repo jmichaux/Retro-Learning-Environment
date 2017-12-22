@@ -33,7 +33,7 @@ StreetsOfRage3Settings::StreetsOfRage3Settings() {
     			// Moving
 //          JOYPAD_DOWN,      //Walk down
 //          JOYPAD_UP,        // Walk up
-//					JOYPAD_LEFT,      // Walk left
+					JOYPAD_LEFT,      // Walk left
 					JOYPAD_RIGHT,     // Walk right
 //         	JOYPAD_GENESIS_C, // Jump
 //          JOYPAD_LEFT | JOYPAD_GENESIS_C,
@@ -80,201 +80,109 @@ void StreetsOfRage3Settings::step(const RleSystem& system) {
 // This setting gives all enemies minimal health and lives
   if((system.settings()->getBool("SOR3_test") == true) || system.settings()->getInt("SOR3_difficulty") == 0){
       // Fix enemy health and lives
-      writeRam(&system, 0xE16D, 0x0);
-      writeRam(&system, 0xE26D, 0x0);
-      writeRam(&system, 0xE36D, 0x0);
-      writeRam(&system, 0xE46D, 0x0);
+  
+       writeRam(&system, 0xE16D, 0x0);
+       writeRam(&system, 0xE26D, 0x0);
+       writeRam(&system, 0xE36D, 0x0);
+       writeRam(&system, 0xE46D, 0x0);
        writeRam(&system, 0xE56D, 0x0);
-      //writeRam(&system, 0xE18B, 0x0);
-      //writeRam(&system, 0xE28B, 0x0);
-       writeRam(&system, 0xE38B, 0x0);
-       writeRam(&system, 0xE48B, 0x0);
-       writeRam(&system, 0xE58B, 0x0);
-}
+      // writeRam(&system, 0xE18B, 0x0);
+      // writeRam(&system, 0xE28B, 0x0);
+      // writeRam(&system, 0xE38B, 0x0);
+      // writeRam(&system, 0xE48B, 0x0);
+      // writeRam(&system, 0xE58B, 0x0);
+
+  }
 // End code for testing
 
-
 //  Read out current score, health, lives, kills
-  // Score set to 0. Will read score from rle/gym wrapper
+// Score set to 0. Will read score from rle/gym wrapper
   reward_t score = 0; //getDecimalScore(0xEF99, 0xEF96, &system);
-  // m_lives = readRam(&system, 0xDF8A);
-  // m_health = readRam(&system, 0xDF6D);
-
-//  std::cout << readRam(&system, 0xFB02) << std::endl;
 
 //  update the reward
   m_reward = score - m_score;
   m_score = score;
 
-//	Update terminal status
+// Lose if game over
   if ((readRam(&system, 0xDFA1) == 255) && readRam(&system, 0xFB00) == 14){
       std::cout << "LOST GAME" << std::endl;
       m_terminal = true;
-    }
+  }
 
-// Get level information
-  // m_current_level = readRam(&system, 0xFB04) + 1;
-  // m_end_level = system.settings()->getInt("SOR3_end_level");
-  // if((m_end_level < system.settings()->getInt("SOR3_start_level")) || (m_end_level > 8)){
-  //    m_end_level = system.settings()->getInt("SOR3_start_level");
-  // }
-
+  // Get level information
   m_current_level = readRam(&system, 0xFB04) + 1;
   m_end_level = system.settings()->getInt("SOR3_end_level");
+
+  // Get information on agent position
+  int m_position = 256 * readRam(&system, 0xDF41) + readRam(&system, 0xDF40); 
+  int scene = readRam(&system, 0xFB02); 
+
+  // Get boss information
+  int boss_1_ID = readRam(&system, 0xE10C);
+  int boss_present = readRam(&system, 0xE10C) + readRam(&system, 0xE20C) + readRam(&system, 0xE30C);
+  int boss_1_health = readRam(&system, 0xE16D);
+  int boss_2_health = readRam(&system, 0xE26D);
+  int boss_3_health = readRam(&system, 0xE36D);
+  int boss_health = boss_1_health + boss_2_health + boss_3_health;
+  int boss_1_lives = readRam(&system, 0xE18A);
+  int boss_lives = readRam(&system, 0xE18A) + readRam(&system, 0xE28A) + readRam(&system, 0xE38A);
+
+  // Win if we accidentily go past the end level
   if(m_end_level < m_current_level){
-      std::cout << "Current level: " << m_current_level << std::endl;
-      std::cout << "End level: " << m_end_level << std::endl;
-      std::cout << "Scene: " << readRam(&system, 0xFB02) << std::endl;
-      std::cout << "Position: " << readRam(&system, 0xDF02) << std::endl;
-      std::cout << "Boss 1 ID: " << readRam(&system, 0xE10C) << std::endl;
-      std::cout << "Boss 2 ID: " << readRam(&system, 0xE20C) << std::endl;
-      std::cout << "Boss 3 ID: " << readRam(&system, 0xE30C) << std::endl;
-      std::cout << "Boss 1 health: " << readRam(&system, 0xE16D) << std::endl;
-      std::cout << "Boss 2 health: " << readRam(&system, 0xE26D) << std::endl;
-      std::cout << "Boss 3 health: " << readRam(&system, 0xE36D) << std::endl;
-      std::cout << "Boss 1 lives: " << readRam(&system, 0xE18A) << std::endl;
-      std::cout << "Boss 2 lives: " << readRam(&system, 0xE28A) << std::endl;
-      std::cout << "Boss 3 lives: " << readRam(&system, 0xE38A) << std::endl;
-      std::cout << "lost game!" << std::endl;
-      m_terminal = true;
-     m_terminal = true;
+    std::cout << "ADVANCED TO NEXT LEVEL" << std::endl;
+    m_terminal = true;
   }
-    // Get information on agent position
-    int m_progress_1 = readRam(&system, 0xDF40); // distance 1
-    int m_progress_2 = readRam(&system, 0xFED0); // distance 2
-    int m_progress_3 = readRam(&system, 0xDF02); // distance 3
-    int scene = readRam(&system, 0xFB02); // scene
-
-    // std::cout << "Position 1: " << readRam(&system, 0xDF40) << std::endl;
-    // std::cout << "Position 2: " << readRam(&system, 0xFED0) << std::endl;
-    // std::cout << "Position 3: " << readRam(&system, 0xDF02) << std::endl;
-
-    // Get boss status
-    int boss_1 = readRam(&system, 0xE10C);
-    int boss_2 = readRam(&system, 0xE20C);
-    int boss_3 = readRam(&system, 0xE30C);
-    int boss_health = readRam(&system, 0xE16D) + readRam(&system, 0xE26D) +readRam(&system, 0xE36D);
-    int boss_lives = readRam(&system, 0xE18A) + readRam(&system, 0xE28A) + readRam(&system, 0xE38A);
-
-    // if (boss_1  > 0){
-    //     std::cout << "right RAM address: " << boss_1 << std::endl;
-    // }
-
-if((m_end_level == 1) && (m_current_level == 1)){
-    if ((scene == 2) && (m_progress_3 > 400) && (boss_1 > 0) && (boss_health == 0) && (boss_lives == 0)){
-        std::cout << "won game" << std::endl;
-        m_terminal = true;
+  // Win if round clear
+  if ((system.settings()->getBool("SOR3_round_clear") == true) && ((m_current_level != 7) || (m_current_level != 8))){
+    if ((m_end_level == m_current_level) && (readRam(&system, 0xFB00) == 46)){
+      std::cout << "ROUND CLEAR!" << std::endl;
+      m_terminal = true;
     }
-}else if ((m_end_level == 2) && (m_current_level == 2)){
-    if ((scene == 2) && (m_progress_3 > 100) && ((boss_health + boss_lives) == 0) && ((boss_1 > 0) || (boss_2 > 0) || (boss_3 > 0))){
-        std::cout << "Current level: " << m_current_level << std::endl;
-        std::cout << "End level: " << m_end_level << std::endl;
-        std::cout << "Scene: " << readRam(&system, 0xFB02) << std::endl;
-        std::cout << "Position: " << readRam(&system, 0xDF02) << std::endl;
-        std::cout << "Boss 1 ID: " << readRam(&system, 0xE10C) << std::endl;
-        std::cout << "Boss 2 ID: " << readRam(&system, 0xE20C) << std::endl;
-        std::cout << "Boss 3 ID: " << readRam(&system, 0xE30C) << std::endl;
-        std::cout << "Boss 1 health: " << readRam(&system, 0xE16D) << std::endl;
-        std::cout << "Boss 2 health: " << readRam(&system, 0xE26D) << std::endl;
-        std::cout << "Boss 3 health: " << readRam(&system, 0xE36D) << std::endl;
-        std::cout << "Boss 1 lives: " << readRam(&system, 0xE18A) << std::endl;
-        std::cout << "Boss 2 lives: " << readRam(&system, 0xE28A) << std::endl;
-        std::cout << "Boss 3 lives: " << readRam(&system, 0xE38A) << std::endl;
-        std::cout << " won game!" << std::endl;
-        m_terminal = true;
-    }else {
-        // std::cout << "Current level: " << m_current_level << std::endl;
-        // std::cout << "End level: " << m_end_level << std::endl;
-        // std::cout << "Scene: " << readRam(&system, 0xFB02) << std::endl;
-        // std::cout << "Position: " << readRam(&system, 0xDF02) << std::endl;
-        // std::cout << "Boss 1 ID: " << readRam(&system, 0xE10C) << std::endl;
-        // std::cout << "Boss 2 ID: " << readRam(&system, 0xE20C) << std::endl;
-        // std::cout << "Boss 3 ID: " << readRam(&system, 0xE30C) << std::endl;
-        // std::cout << "Boss 1 health: " << readRam(&system, 0xE16D) << std::endl;
-        // std::cout << "Boss 2 health: " << readRam(&system, 0xE26D) << std::endl;
-        // std::cout << "Boss 3 health: " << readRam(&system, 0xE36D) << std::endl;
-        // std::cout << "Boss 1 lives: " << readRam(&system, 0xE18A) << std::endl;
-        // std::cout << "Boss 2 lives: " << readRam(&system, 0xE28A) << std::endl;
-        // std::cout << "Boss 3 lives: " << readRam(&system, 0xE38A) << std::endl;
-        // std::cout << " lost!" << std::endl;
-        // m_terminal = true;
+  }else{
+  // Win if agent is in right place, with bosses present, and bosses dead
+    if((m_end_level == 1) && (m_current_level == 1)){
+        if ((scene == 2) && (m_position > 400) && (boss_present > 0) && ((boss_1_health + boss_1_lives == 0))){
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 2) && (m_current_level == 2)){
+        if ((scene == 2) && (m_position > 100) && (boss_present > 0) && ((boss_health + boss_lives) == 0) ){
+            std::cout << " won game!" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 3) && (m_current_level == 3)){
+      if ((scene == 2) && (m_position > 400) && (boss_present > 0) && ((boss_1_health + boss_1_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 4) && (m_current_level == 4)){
+        if ((scene == 2) && (m_position> 300) && (boss_present > 0) && ((boss_1_health + boss_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 5) && (m_current_level == 5)){
+        if ((scene == 7) && (m_position > 30) && (boss_1_ID  == 56) && ((boss_1_health + boss_1_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 6) && (m_current_level == 6)){
+        if ((scene == 7) && (m_position > 50) && (boss_present > 0) && ((boss_1_health + boss_1_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 7) && (m_current_level == 7)){
+        if ((scene == 4) && (m_position > 30) && (boss_present > 0) && ((boss_1_health + boss_1_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
+    }else if ((m_end_level == 8) && (m_current_level == 8)){
+        if ((scene == 3) && (m_position > 30) && (boss_present > 0) && ((boss_1_health + boss_1_lives) == 0)){
+            std::cout << "won game" << std::endl;
+            m_terminal = true;
+        }
     }
-//     if ((scene == 2) && (m_progress_3 > 400) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }else if ((m_end_level == 4) && (m_current_level == 4)){
-//     if ((scene == 2) && (m_progress_3 > 300) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }else if ((m_end_level == 5) && (m_current_level == 5)){
-//     if ((scene == 7) && (m_progress_3 > 30) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }else if ((m_end_level == 6) && (m_current_level == 6)){
-//     if ((scene == 7) && (m_progress_3 > 200) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }else if ((m_end_level == 7) && (m_current_level == 7)){
-//     if ((scene == 4) && (m_progress_3 > 30) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }else if ((m_end_level == 8) && (m_current_level == 8)){
-//     if ((scene == 3) && (m_progress_3 > 30) && (boss_present > 0) && (boss_health == 0) && (boss_lives == 0)){
-//         std::cout << "won game" << std::endl;
-//         m_terminal = true;
-//     }
-// }
 
-
-// // Level 1
-  // if (m_end_level == 1){
-  //      if ((m_current_level == 1) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
-  //          m_terminal = true;
-  //      }
-  // }// Level 2
-  // else if (m_end_level == 2){
-  //      if ((m_current_level == 2) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 128)){
-  //          m_terminal = true;
-  //      }
-  // }// Level 3
-  // else if (m_end_level == 3){
-  //     if ((m_current_level == 3) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 400)){
-  //          m_terminal = true;
-  //     }
-  // }// Level 4
-  // else if (m_end_level == 4){
-  //     if ((m_current_level == 4) && (scene == 2) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 300)){
-  //          m_terminal = true;
-  //     }
-  // }// Level 5
-  // else if (m_end_level == 5){
-  //     if ((m_current_level == 5) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
-  //          m_terminal = true;
-  //      }
-  // }// Level 6
-  // else if (m_end_level == 6){
-  //     if ((m_current_level == 6) && (scene == 7) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 200)){
-  //          m_terminal = true;
-  //      }
-  // }// Level 7
-  // else if (m_end_level == 7){
-  //     if ((m_current_level == 7) && (scene == 4) && (m_progress_1 == 0) && (m_progress_2 == 25) && (m_progress_3 > 30)){
-  //          m_terminal = true;
-  //      }
-  // }// Level 8 (Alternate level 7)
-  // else if (m_end_level == 8){
-  //     if ((m_current_level == 8) && (scene == 3) && (m_progress_1 == 0) && (m_progress_2 == 116) &&  (m_progress_3 > 30)){
-  //          m_terminal = true;
-  //      }
-  // }
+  }
 }
-}
-
 
 
 /* reset the state of the game */

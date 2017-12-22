@@ -340,11 +340,12 @@ void Settings::setDefaultSettings() {
   stringSettings.emplace(std::make_pair("SOR3_game_type", "single")); // can be single, coop, duel
   stringSettings.emplace(std::make_pair("SOR3_player_1_character", "axel")); 
   stringSettings.emplace(std::make_pair("SOR3_player_2_character", "blaze"));
-  intSettings.emplace(std::make_pair("SOR3_start_level", 2));
-  intSettings.emplace(std::make_pair("SOR3_end_level", 2));
+  intSettings.emplace(std::make_pair("SOR3_start_level", 1));
+  intSettings.emplace(std::make_pair("SOR3_end_level", 1));
   intSettings.emplace(std::make_pair("SOR3_difficulty", 1));
   intSettings.emplace(std::make_pair("SOR3_lives", 9));
-  boolSettings.emplace(std::make_pair("SOR3_test", true));
+  boolSettings.emplace(std::make_pair("SOR3_test", false));
+  boolSettings.emplace(std::make_pair("SOR3_round_clear", false));
   
 
   // Super Mario Kart
