@@ -27,30 +27,29 @@ using namespace rle;
 StreetsOfRage3Settings::StreetsOfRage3Settings() {
     reset();
 
-// Actions will be set in a RLE gym wrapper
-
+// Actions can also be set in a RLE gym wrapper
       minimalActions = {JOYPAD_NOOP,
     			// Moving
-//          JOYPAD_DOWN,      //Walk down
-//          JOYPAD_UP,        // Walk up
+         JOYPAD_DOWN,      //Walk down
+         JOYPAD_UP,        // Walk up
 					JOYPAD_LEFT,      // Walk left
 					JOYPAD_RIGHT,     // Walk right
-//         	JOYPAD_GENESIS_C, // Jump
-//          JOYPAD_LEFT | JOYPAD_GENESIS_C,
-//          JOYPAD_RIGHT | JOYPAD_GENESIS_C,
+        	JOYPAD_GENESIS_C, // Jump
+         JOYPAD_LEFT | JOYPAD_GENESIS_C,
+         JOYPAD_RIGHT | JOYPAD_GENESIS_C,
 
 		      // Special attacks
 					JOYPAD_GENESIS_A,
-   //       JOYPAD_LEFT | JOYPAD_GENESIS_A,
-    //      JOYPAD_RIGHT |JOYPAD_GENESIS_A,
+         JOYPAD_LEFT | JOYPAD_GENESIS_A,
+         JOYPAD_RIGHT |JOYPAD_GENESIS_A,
 
           // Regular Attacks
 	    		JOYPAD_GENESIS_B,
 					JOYPAD_GENESIS_B | JOYPAD_GENESIS_C,   // Rear attack or Super slam
 
           // Attacks when holding enemy
-//          JOYPAD_GENESIS_B | JOYPAD_LEFT,
-//				  JOYPAD_GENESIS_B | JOYPAD_RIGHT,
+         JOYPAD_GENESIS_B | JOYPAD_LEFT,
+				  JOYPAD_GENESIS_B | JOYPAD_RIGHT,
     };
 }
 
